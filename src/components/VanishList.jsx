@@ -4,35 +4,31 @@ import { FiClock, FiPlus, FiTrash2 } from "react-icons/fi";
 import { motion } from "framer-motion";
 
 export const VanishList = () => {
-  const [todos, setTodos] = useState([
-    {
-      id: 1,
-      text: "Make assignment",
-      checked: true,
-      time: "1 hrs",
-    },
-    {
-      id: 2,
-      text: "Document the project",
-      checked: false,
-      time: "1 hrs",
-    },
-    {
-      id: 3,
-      text: "Work on the ecommerce app",
-      checked: false,
-      time: "3 hrs",
-    },
-  ]);
+  const [todos, setTodos] = useState([]);
+
+  // Load todos from local storage when the component mounts
+  useEffect(() => {
+    const storedTodos = JSON.parse(localStorage.getItem("todos"));
+    if (storedTodos) {
+      setTodos(storedTodos);
+    }
+  }, []);
+
+  // Update local storage whenever the todos state changes
+  useEffect(() => {
+    if (todos.length > 0) {
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }
+  }, [todos]);
 
   const handleCheck = (id) => {
-    setTodos((pv) =>
-      pv.map((t) => (t.id === id ? { ...t, checked: !t.checked } : t))
+    setTodos((prevTodos) =>
+      prevTodos.map((t) => (t.id === id ? { ...t, checked: !t.checked } : t))
     );
   };
 
   const removeElement = (id) => {
-    setTodos((pv) => pv.filter((t) => t.id !== id));
+    setTodos((prevTodos) => prevTodos.filter((t) => t.id !== id));
   };
 
   return (
@@ -75,14 +71,14 @@ const Form = ({ setTodos }) => {
       return;
     }
 
-    setTodos((pv) => [
+    setTodos((prevTodos) => [
       {
         id: Math.random(),
         text,
         checked: false,
         time: `${time} ${unit}`,
       },
-      ...pv,
+      ...prevTodos,
     ]);
 
     setTime(15);
@@ -152,7 +148,7 @@ const Form = ({ setTodos }) => {
         )}
       </AnimatePresence>
       <button
-        onClick={() => setVisible((pv) => !pv)}
+        onClick={() => setVisible((prevVisible) => !prevVisible)}
         className="grid w-full place-content-center rounded-full border border-zinc-700 bg-zinc-900 py-3 text-lg text-white transition-colors hover:bg-zinc-800 active:bg-zinc-900"
       >
         <FiPlus
@@ -169,16 +165,16 @@ const Todos = ({ todos, handleCheck, removeElement }) => {
   return (
     <div className="w-full space-y-3">
       <AnimatePresence>
-        {todos.map((t) => (
+        {todos.map((todo) => (
           <Todo
             handleCheck={handleCheck}
             removeElement={removeElement}
-            id={t.id}
-            key={t.id}
-            checked={t.checked}
-            time={t.time}
+            id={todo.id}
+            key={todo.id}
+            checked={todo.checked}
+            time={todo.time}
           >
-            {t.text}
+            {todo.text}
           </Todo>
         ))}
       </AnimatePresence>
